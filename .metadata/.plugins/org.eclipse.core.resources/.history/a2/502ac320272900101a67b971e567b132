@@ -1,0 +1,109 @@
+package com.account.controller;
+
+import com.account.model.AccountRequest;
+import com.account.model.BalanceUpdateRequest;
+import com.account.model.AccountResponse;
+import com.account.service.AccountService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+
+@WebMvcTest(AccountController.class)
+public class AccountControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Mock
+    private AccountService accountService;
+
+    @InjectMocks
+    private AccountController accountController;
+
+    @BeforeEach
+    public void setUp() {
+        mockMvc = MockMvcBuilders.standaloneSetup(accountController).build();
+    }
+
+    @Test
+    public void testCreateAccount() throws Exception {
+        // Prepare test data
+        AccountRequest request = new AccountRequest("shikha.sharma@example.com", "SAVINGS", 5000.0);
+        AccountResponse response = new AccountResponse(1L, "shikha.sharma@example.com", "SAVINGS", 5000.0, null);
+
+        // Mocking the service method
+        when(accountService.createAccountOrThrow(request)).thenReturn(response);
+
+        // Perform the request and check the response
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/account/create")
+                        .contentType("application/json")
+                        .content("{ \"userEmail\": \"shikha.sharma@example.com\", \"accountType\": \"SAVINGS\", \"balance\": 5000.0 }"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userEmail").value("shikha.sharma@example.com"))
+                .andExpect(jsonPath("$.accountType").value("SAVINGS"))
+                .andExpect(jsonPath("$.balance").value(5000.0));
+    }
+
+    @Test
+    public void testGetBalance() throws Exception {
+        // Prepare test data
+        String userEmail = "shikha.sharma@example.com";
+        double balance = 5000.0;
+
+        // Mocking the service method
+        when(accountService.getBalanceByEmail(userEmail)).thenReturn(balance);
+
+        // Perform the request and check the response
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/account/balance/{userEmail}", userEmail))
+                .andExpect(status().isOk())
+                .andExpect(content().string(String.valueOf(balance)));
+    }
+
+    @Test
+    public void testUpdateBalance() throws Exception {
+        // Prepare test data
+        BalanceUpdateRequest request = new BalanceUpdateRequest("shikha.sharma@example.com", 1000.0, true);
+        double newBalance = 6000.0;
+
+        // Mocking the service method
+        when(accountService.updateBalance(request.getUserEmail(), request.getAmount(), request.isCredit())).thenReturn(newBalance);
+
+        // Perform the request and check the response
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/account/balance/update")
+                        .contentType("application/json")
+                        .content("{ \"userEmail\": \"shikha.sharma@example.com\", \"amount\": 1000.0, \"credit\": true }"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(String.valueOf(newBalance)));
+    }
+
+    @Test
+    public void testUpdateBalance_InsufficientBalance() throws Exception {
+        // Prepare test data for insufficient balance scenario
+        BalanceUpdateRequest request = new BalanceUpdateRequest("shikha.sharma@example.com", 10000.0, false);
+
+        // Mocking the service method to throw an exception
+        when(accountService.updateBalance(request.getUserEmail(), request.getAmount(), request.isCredit()))
+                .thenThrow(new RuntimeException("Insufficient balance"));
+
+        // Perform the request and check the response
+        mockMvc.perform(MockMvcRequestBuilders.put("/api/account/balance/update")
+                        .contentType("application/json")
+                        .content("{ \"userEmail\": \"shikha.sharma@example.com\", \"amount\": 10000.0, \"credit\": false }"))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Insufficient balance"));
+    }
+}

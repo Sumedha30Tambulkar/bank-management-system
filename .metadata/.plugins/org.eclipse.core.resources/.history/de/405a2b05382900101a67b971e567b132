@@ -1,0 +1,36 @@
+package com.account.controller;
+
+import com.account.model.AccountRequest;
+import com.account.model.BalanceUpdateRequest;
+import com.account.model.AccountResponse;
+import com.account.service.AccountService;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/account")
+public class AccountController {
+
+    @Autowired
+    private AccountService accountService;
+
+    @PostMapping("/create")
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest request) {
+        return ResponseEntity.ok(accountService.createAccountOrThrow(request));
+    }
+
+    @GetMapping("/balance/{userEmail}")
+    public ResponseEntity<Double> getBalance(@PathVariable String userEmail) {
+        return ResponseEntity.ok(accountService.getBalanceByEmail(userEmail));
+    }
+
+    @PutMapping("/balance/update")
+    public ResponseEntity<Double> updateBalance(@RequestBody BalanceUpdateRequest request) {
+        return ResponseEntity.ok(accountService.updateBalance(
+                request.getUserEmail(),
+                request.getAmount(),
+                request.isCredit()));
+    }
+}

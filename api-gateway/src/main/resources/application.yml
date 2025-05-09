@@ -1,0 +1,27 @@
+
+server:
+  port: 8765
+
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: User
+        uri: http://localhost:8082
+        predicates: 
+          - Path=api/auth/**
+
+      - id: transaction-service
+        uri: http://localhost:8084
+        predicates:
+          - Path=api/secure/**
+
+      - id: account-service
+        uri: http://localhost:8085
+        predicates:
+          - Path=api/account/**
+          
+logging:
+  level:
+    org.springframework.security: DEBUG
+       

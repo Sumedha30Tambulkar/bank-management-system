@@ -1,0 +1,30 @@
+package com.transaction.main.security;
+
+import org.springframework.stereotype.Component;
+
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+
+@Component
+public class JwtUtil {
+
+	private final String SECRET = "e?tZm)Y[zuD8ECWgd`&a]!_R.h";
+	private final long EXPIRATION_TIME = 86400000; // 1 day in millisecond
+	
+	
+	public String getEmailFromToken(String token) {
+        return JWT.require(Algorithm.HMAC256(SECRET))
+                .build()
+                .verify(token)
+                .getSubject();
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            JWT.require(Algorithm.HMAC256(SECRET)).build().verify(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+}

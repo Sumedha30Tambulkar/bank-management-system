@@ -1,0 +1,12 @@
+
+server:
+  port: 8765
+
+spring:
+  cloud:
+    gateway:
+      routes:
+      - id: User
+        uri: http://localhost:8082
+        predicates: 
+          - Path=api/auth/**

@@ -1,0 +1,44 @@
+package com.example.main.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.main.entity.User;
+import com.example.main.service.UserService;
+
+@RestController
+@RequestMapping("/api/auth")
+public class UserController {
+	
+	@Autowired
+	private UserService userService;
+	
+	@PostMapping("/register")
+    public ResponseEntity<String> registerUser(@RequestBody User user) {
+        String result = userService.registerUser(user);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
+	@PostMapping("/login")
+	public ResponseEntity<String> loginUser(@RequestBody User loginData) {
+	    String result = userService.loginUser(loginData.getEmail(), loginData.getPassword());
+	    
+	    if (result.equals("Login successful")) {
+	        return new ResponseEntity<>(result, HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>(result, HttpStatus.UNAUTHORIZED);
+	    }
+	}
+	
+	@GetMapping("/home")
+	public String hello() {
+		return "Hello & welcome! Sumedha...... Testing working";
+		
+		
+	}
+}

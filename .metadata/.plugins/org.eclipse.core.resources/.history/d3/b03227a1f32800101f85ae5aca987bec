@@ -1,0 +1,15 @@
+package com.transaction.main.repository;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.transaction.main.entity.Transaction;
+
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    List<Transaction> findBySenderAccount(Long accountId);
+    List<Transaction> findByReceiverAccount(Long accountId);
+    List<Transaction> findBySenderAccountOrReceiverAccount(Long sender, Long receiver);
+}

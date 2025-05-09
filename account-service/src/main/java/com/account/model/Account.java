@@ -1,0 +1,45 @@
+package com.account.model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name="accounts")
+public class Account {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "account_id")
+    private long accountId;
+
+    @Column(name = "user_email", nullable = false, unique = true)
+    private String userEmail;
+
+    @Column(name = "account_type", nullable = false)
+    private String accountType;
+
+    @Column(nullable = false)
+    private double balance;
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    public Account(String accountType, Double balance) {
+        this.accountType = accountType;
+        this.balance = balance;
+        this.createdAt = LocalDateTime.now();
+    }
+}

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Rename package &apos;com.example&apos; to &apos;com.example.main&apos;&#x0D;&#x0A;- Original project: &apos;User&apos;&#x0D;&#x0A;- Original element: &apos;User/src/main/java/com.example&apos;&#x0D;&#x0A;- Renamed element: &apos;User/src/main/java/com.example.main&apos;&#x0D;&#x0A;- Update references to refactored element&#x0D;&#x0A;- Update fully qualified names in &apos;*&apos; files&#x0D;&#x0A;- Update textual occurrences in comments and strings&#x0D;&#x0A;- Rename subpackages of the package" description="Rename package &apos;com.example&apos;" flags="589830" hierarchical="true" id="org.eclipse.jdt.ui.rename.package" input="/src\/main\/java=/optional=/true=/=/maven.pomderived=/true=/&lt;com.example" name="com.example.main" patterns="*" qualified="true" references="true" stamp="1743862097319" textual="true" version="1.0"/>
+</session>

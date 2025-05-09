@@ -1,0 +1,79 @@
+package com.example.main.service;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.example.main.entity.Gender;
+import com.example.main.entity.User;
+import com.example.main.repository.UserRepository;
+
+@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
+ 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    public String registerUser(User user) {
+        // ✅ Check if user-email already exists
+        if (userRepository.existsByEmail(user.getEmail())) {
+            return "User already exists";
+        }
+        
+        // ✅ Gender Validation
+        try {
+            Gender gender = Gender.valueOf(user.getGender().name());  // Validates enum
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return "Invalid gender value! Allowed values are: MALE, FEMALE, OTHER";
+        }
+
+        User user1 = new User();
+        user1.setUserName(user.getUserName());
+        user1.setDob(user.getDob());
+        user1.setGender(user.getGender());
+        user1.setAddress(user.getAddress());
+        user1.setEmail(user.getEmail());
+        
+        // ✅ Password Encoding
+        user1.setPassword(passwordEncoder.encode(user.getPassword()));  // Encrypt password before saving
+        
+        user1.setRole(user.getRole());
+        
+        // ✅ Save user to repository
+        userRepository.save(user1);  // Save the correctly populated user1 object
+        
+        return "User registered successfully!";
+    }
+
+    public String loginUser(String email, String rawPassword) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+
+        if (userOpt.isPresent()) {
+            User user = userOpt.get();
+            if (passwordEncoder.matches(rawPassword, user.getPassword())) {
+                return "Login successful";
+            } else {
+                return "Invalid password";
+            }
+        } else {
+            return "User not found";
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+}

@@ -1,0 +1,5 @@
+package com.transaction.main.config;
+
+public class SecurityConfig {
+
+}

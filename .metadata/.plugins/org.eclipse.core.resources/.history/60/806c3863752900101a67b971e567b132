@@ -1,0 +1,104 @@
+package com.transaction.main.controller;
+
+import com.transaction.main.controller.TransactionController;
+import com.transaction.main.entity.Transaction;
+import com.transaction.main.service.TransactionService;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import org.springframework.http.ResponseEntity;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+public class TransactionControllerTest {
+
+    @Mock
+    private TransactionService transactionService;
+
+    @InjectMocks
+    private TransactionController transactionController;
+
+    private Transaction sampleTransaction;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+
+        sampleTransaction = new Transaction();
+        sampleTransaction.setSenderAccount("sender@example.com");
+        sampleTransaction.setReceiverAccount("receiver@example.com");
+        sampleTransaction.setAmount(150.0);
+    }
+
+    @Test
+    public void testDoTransaction_Success() {
+        when(transactionService.performTransaction("sender@example.com", "receiver@example.com", 150.0))
+                .thenReturn(sampleTransaction);
+
+        ResponseEntity<Transaction> response = transactionController.doTransaction(sampleTransaction);
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertEquals(sampleTransaction, response.getBody());
+        verify(transactionService).performTransaction("sender@example.com", "receiver@example.com", 150.0);
+    }
+
+    @Test
+    public void testDoTransaction_Failure() {
+        when(transactionService.performTransaction(anyString(), anyString(), anyDouble()))
+                .thenThrow(new RuntimeException("Simulated Failure"));
+
+        ResponseEntity<Transaction> response = transactionController.doTransaction(sampleTransaction);
+
+        assertEquals(500, response.getStatusCodeValue());
+        assertNull(response.getBody());
+    }
+
+    @Test
+    public void testGetSentTransactions() {
+        List<Transaction> mockList = Arrays.asList(sampleTransaction);
+        when(transactionService.getSentTransactions("sender@example.com")).thenReturn(mockList);
+
+        List<Transaction> result = transactionController.getSentTransactions("sender@example.com");
+
+        assertEquals(1, result.size());
+        assertEquals("receiver@example.com", result.get(0).getReceiverAccount());
+        verify(transactionService).getSentTransactions("sender@example.com");
+    }
+
+    @Test
+    public void testGetReceivedTransactions() {
+        List<Transaction> mockList = Arrays.asList(sampleTransaction);
+        when(transactionService.getReceivedTransactions("receiver@example.com")).thenReturn(mockList);
+
+        List<Transaction> result = transactionController.getReceivedTransactions("receiver@example.com");
+
+        assertEquals(1, result.size());
+        assertEquals("sender@example.com", result.get(0).getSenderAccount());
+        verify(transactionService).getReceivedTransactions("receiver@example.com");
+    }
+
+    @Test
+    public void testGetAllTransactions() {
+        List<Transaction> mockList = Arrays.asList(sampleTransaction);
+        when(transactionService.getAllTransactionHistory("user@example.com")).thenReturn(mockList);
+
+        List<Transaction> result = transactionController.getAllTransactions("user@example.com");
+
+        assertEquals(1, result.size());
+        verify(transactionService).getAllTransactionHistory("user@example.com");
+    }
+
+    @Test
+    public void testHelloEndpoint() {
+        String message = transactionController.hello();
+        assertEquals("Hello and Welcome!", message);
+    }
+}

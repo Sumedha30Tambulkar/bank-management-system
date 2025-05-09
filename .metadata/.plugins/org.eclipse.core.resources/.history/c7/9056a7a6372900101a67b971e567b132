@@ -1,0 +1,66 @@
+package com.transaction.main.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.transaction.main.entity.Transaction;
+import com.transaction.main.repository.TransactionRepository;
+
+@Service
+public class TransactionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(TransactionService.class);
+
+    @Autowired
+    private TransactionRepository transactionRepository;
+
+    /**
+     * Performs a transaction between sender and receiver with the given amount.
+     * Logs the transaction and saves it to the repository.
+     */
+    public Transaction performTransaction(String senderAccount, String receiverAccount, Double amount) {
+        logger.info("Initiating transaction from {} to {} for ₹{}", senderAccount, receiverAccount, amount);
+
+        Transaction transaction = new Transaction();
+        transaction.setSenderAccount(senderAccount);
+        transaction.setReceiverAccount(receiverAccount);
+        transaction.setAmount(amount);
+        transaction.setType("TRANSFER");
+        transaction.setStatus("SUCCESS");
+        transaction.setTimestamp(LocalDateTime.now());
+
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        logger.info("Transaction completed successfully: ID {}", savedTransaction.getId());
+
+        return savedTransaction;
+    }
+
+    /**
+     * Returns all transactions sent by a specific account.
+     */
+    public List<Transaction> getSentTransactions(String senderAccount) {
+        logger.debug("Fetching sent transactions for {}", senderAccount);
+        return transactionRepository.findBySenderAccount(senderAccount);
+    }
+
+    /**
+     * Returns all transactions received by a specific account.
+     */
+    public List<Transaction> getReceivedTransactions(String receiverAccount) {
+        logger.debug("Fetching received transactions for {}", receiverAccount);
+        return transactionRepository.findByReceiverAccount(receiverAccount);
+    }
+
+    /**
+     * Returns complete transaction history (sent or received) for a given user email.
+     */
+    public List<Transaction> getAllTransactionHistory(String email) {
+        logger.info("Fetching full transaction history for {}", email);
+        return transactionRepository.findBySenderAccountOrReceiverAccount(email, email);
+    }
+}

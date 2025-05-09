@@ -1,0 +1,43 @@
+package com.account.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import com.account.model.AccountRequest;
+import com.account.model.AccountResponse;
+import com.account.model.AccountUpdateRequest;
+import com.account.service.AccountService;
+
+@RestController
+@RequestMapping("api/account/")
+public class AccountController {
+
+    @Autowired
+    private AccountService accountService;
+
+    // ✅ Create Account – Uses email from JWT token
+    @PostMapping("/create")
+    public ResponseEntity<AccountResponse> create(@RequestBody AccountRequest request, Authentication authentication) {
+        String userEmail = authentication.getName(); // Extract from JWT
+        AccountResponse response = accountService.createAccount(request, userEmail);
+        return ResponseEntity.ok(response);
+    }
+
+    // ✅ Get Balance – Only for logged-in user
+    @GetMapping("/balance")
+    public ResponseEntity<Double> getBalance(Authentication authentication) {
+        String userEmail = authentication.getName();
+        Double balance = accountService.getBalanceByEmail(userEmail);
+        return ResponseEntity.ok(balance);
+    }
+
+    // ✅ Update balance – Debit or Credit
+    @PutMapping("/update")
+    public ResponseEntity<String> updateBalance(@RequestBody AccountUpdateRequest req, Authentication authentication) {
+        String userEmail = authentication.getName();
+        String result = accountService.updateBalance(userEmail, req.getAmount(), req.isCredit());
+        return ResponseEntity.ok(result);
+    }
+}
