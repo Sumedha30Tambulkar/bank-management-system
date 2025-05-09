@@ -1,0 +1,43 @@
+package com.transaction.main.service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.transaction.main.entity.Transaction;
+import com.transaction.main.repository.TransactionRepository;
+
+@Service
+public class TransactionService {
+
+	@Autowired
+	private TransactionRepository transactionRepository;
+	
+	public Transaction performTransaction(Long senderAccount, Long receiverAccount, Double amount) {
+	    Transaction transaction = new Transaction();
+	    transaction.setSenderAccount(senderAccount);
+	    transaction.setReceiverAccount(receiverAccount);
+	    transaction.setAmount(amount);
+	    transaction.setType("TRANSFER"); // Unified type
+	    transaction.setStatus("SUCCESS");
+	    transaction.setTimestamp(LocalDateTime.now());
+
+	    return transactionRepository.save(transaction);
+	}
+
+
+	public List<Transaction> getSentTransactions(Long senderAccount) {
+	    return transactionRepository.findBySenderAccount(senderAccount);
+	}
+
+	public List<Transaction> getReceivedTransactions(Long receiverAccount) {
+	    return transactionRepository.findByReceiverAccount(receiverAccount);
+	}
+
+	public List<Transaction> getAllTransactionHistory(Long accountId) {
+	    return transactionRepository.findBySenderAccountOrReceiverAccount(accountId, accountId);
+	}
+	
+}

@@ -1,0 +1,27 @@
+package com.account.model;
+
+import java.time.LocalDateTime;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@ToString
+public class AccountRequest {
+	
+	private Long accountId;
+    private String userEmail;
+    private String accountType;
+    private Double balance;
+    private LocalDateTime createdAt;
+	}
+    
+    // getters and setters 
+
+}

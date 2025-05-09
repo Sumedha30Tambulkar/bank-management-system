@@ -1,0 +1,5 @@
+package com.dto.DTO;
+
+public class AccountResponse {
+
+}

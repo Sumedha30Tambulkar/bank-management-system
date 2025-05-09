@@ -1,0 +1,72 @@
+package com.account.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+
+import com.account.model.Account;
+import com.account.model.AccountRequest;
+import com.account.model.AccountResponse;
+import com.account.repository.AccountRepository;
+
+import java.time.LocalDateTime;
+
+@Service
+public class AccountService {
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    public AccountResponse createAccount(AccountRequest request) {
+        Account account = new Account(
+                request.getUserId(),
+                request.getAccountType(),
+                request.getBalance()
+        );
+        account.setCreatedAt(LocalDateTime.now());
+
+        Account savedAccount = accountRepository.save(account);
+
+        return mapToResponse(savedAccount);
+    }
+
+    public AccountResponse getAccountById(Long accountId) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found"));
+        return mapToResponse(account);
+    }
+
+    public Double getBalance(Long userId) {
+        Account account = accountRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found for user: " + userId));
+        return account.getBalance();
+    }
+
+    public String updateBalance(Long userId, double amount, boolean isCredit) {
+        Account account = accountRepository.findById(userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Account not found for user: " + userId));
+
+        double newBalance = isCredit ? account.getBalance() + amount : account.getBalance() - amount;
+
+        if (!isCredit && newBalance < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance.");
+        }
+
+        account.setBalance(newBalance);
+        accountRepository.save(account);
+
+        return "Balance updated successfully.";
+    }
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse dto = new AccountResponse();
+        dto.setAccountId(account.getAccountId());
+        dto.setUserId(account.getUserId());
+        dto.setAccountType(account.getAccountType());
+        dto.setBalance(account.getBalance());
+        dto.setCreatedAt(account.getCreatedAt());
+        return dto;
+    }
+}

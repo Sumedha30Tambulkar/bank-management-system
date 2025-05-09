@@ -1,0 +1,40 @@
+package com.account.model;
+
+import java.time.LocalDateTime;
+
+import jakarta.persistence.*;
+
+import lombok.*;
+
+@Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name="accounts")
+public class Account {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "account_id")
+	private long accountId;
+	
+	@Column(name = "user_id", unique = true)
+	private Long userId;
+	
+	@Column(name = "account_type", nullable = false)
+	private String accountType;
+	
+	 @Column(nullable = false)
+	private double balance;
+	
+	@Column(name = "created_at", nullable = false)
+	private LocalDateTime createdAt;
+
+	public Account(Long userId, String accountType, Double balance) {
+        this.userId = userId;
+        this.accountType = accountType;
+        this.balance = balance;
+        this.createdAt = LocalDateTime.now();
+    }
+	// getters and setters and constructors
+}

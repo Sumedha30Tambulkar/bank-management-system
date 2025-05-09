@@ -1,0 +1,34 @@
+package com.account.controller;
+
+import com.account.model.AccountRequest;
+import com.account.model.AccountResponse;
+import com.account.service.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/secure/account")
+public class AccountController {
+
+    @Autowired
+    private AccountService accountService;
+
+    @PostMapping("/create")
+    public ResponseEntity<AccountResponse> createAccount(@RequestBody AccountRequest request,
+                                                         @RequestHeader("X-USER-EMAIL") String userEmail) {
+        return ResponseEntity.ok(accountService.createAccount(request, userEmail));
+    }
+
+    @GetMapping("/balance")
+    public ResponseEntity<Double> getBalance(@RequestHeader("X-USER-EMAIL") String userEmail) {
+        return ResponseEntity.ok(accountService.getBalanceByEmail(userEmail));
+    }
+
+    @PutMapping("/balance/update")
+    public ResponseEntity<String> updateBalance(@RequestHeader("X-USER-EMAIL") String userEmail,
+                                                @RequestParam double amount,
+                                                @RequestParam boolean credit) {
+        return ResponseEntity.ok(accountService.updateBalance(userEmail, amount, credit));
+    }
+}

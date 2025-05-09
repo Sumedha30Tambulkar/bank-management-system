@@ -1,0 +1,17 @@
+spring.application.name=account-service
+
+server.port=8085
+
+# ✅ MySQL DB Connection with SSL fix and timezone
+spring.datasource.url=jdbc:mysql://localhost:3306/banking?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+spring.datasource.username=root
+spring.datasource.password=pass123
+
+spring.jpa.open-in-view=false
+
+spring.jpa.hibernate.ddl-auto=create-drop
+
+
+# Disable stack trace in error response
+server.error.include-stacktrace=never
+

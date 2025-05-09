@@ -1,0 +1,69 @@
+package com.account.service;
+
+import com.account.model.Account;
+import com.account.model.AccountRequest;
+import com.account.model.AccountResponse;
+import com.account.repository.AccountRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+
+@Service
+public class AccountService {
+
+    @Autowired
+    private AccountRepository accountRepository;
+
+    public AccountResponse createAccount(AccountRequest request, String userEmail) {
+        if (request.getBalance() < 1000.0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Minimum ₹1000 required.");
+        }
+
+        if (accountRepository.findByUserEmail(userEmail).isPresent()) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Account already exists for this user.");
+        }
+
+        Account account = new Account();
+        account.setUserEmail(userEmail);
+        account.setAccountType(request.getAccountType());
+        account.setBalance(request.getBalance());
+        account.setCreatedAt(LocalDateTime.now());
+
+        Account saved = accountRepository.save(account);
+        return mapToResponse(saved);
+    }
+
+    public Double getBalanceByEmail(String userEmail) {
+        Account account = accountRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No account found."));
+        return account.getBalance();
+    }
+
+    public String updateBalance(String userEmail, double amount, boolean credit) {
+        Account account = accountRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No account found."));
+
+        double newBalance = credit ? account.getBalance() + amount : account.getBalance() - amount;
+
+        if (!credit && newBalance < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Insufficient balance.");
+        }
+
+        account.setBalance(newBalance);
+        accountRepository.save(account);
+        return "Balance updated successfully.";
+    }
+
+    private AccountResponse mapToResponse(Account account) {
+        AccountResponse response = new AccountResponse();
+        response.setAccountId(account.getAccountId());
+        response.setUserEmail(account.getUserEmail());
+        response.setAccountType(account.getAccountType());
+        response.setBalance(account.getBalance());
+        response.setCreatedAt(account.getCreatedAt());
+        return response;
+    }
+}

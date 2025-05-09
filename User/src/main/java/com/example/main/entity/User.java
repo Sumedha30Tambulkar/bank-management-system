@@ -1,0 +1,47 @@
+package com.example.main.entity;
+
+import java.sql.Date;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "users")
+@NoArgsConstructor
+@AllArgsConstructor
+public class User {
+	
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long userId;
+	
+	private String userName;
+	
+	private Date dob;
+	
+	@Enumerated(EnumType.STRING)
+	private Gender gender;
+	
+	private String address;
+	
+	private String email;
+	
+	private String password;
+	
+	@Enumerated(EnumType.STRING)
+	private Role role;
+	
+	
+
+}
